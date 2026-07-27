@@ -1,8 +1,8 @@
 # Review of Stressor Linkages: Skagerrak and Kattegat
 
-A Shiny app summarising a Web of Science literature review of stressor relationships
+A Shiny app summarising a Web of Science structured literature review of stressor relationships
 acting in the Skagerrak, Kattegat, Baltic, and North Seas. It renders alluvial
-stressor -> effect -> endpoint pathways and an interactive map of study locations.
+stressor -> effect -> endpoint pathways divided into adverse and beneficial impacts alongside an interactive map of study locations.
 
 Live app: https://gghill.shinyapps.io/Review_Stressors_SkagerrakKattegat/
 
