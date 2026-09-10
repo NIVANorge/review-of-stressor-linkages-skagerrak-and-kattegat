@@ -9,6 +9,7 @@ install.packages(
 )
 
 pak::pkg_install('shiny')
+pak::pkg_install('bslib')
 pak::pkg_install('dplyr')
 pak::pkg_install('stringr')
 pak::pkg_install('leaflet')

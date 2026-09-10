@@ -8,8 +8,9 @@ Live app: https://gghill.shinyapps.io/Review_Stressors_SkagerrakKattegat/
 
 ## Layout
 
-- `app/` - the Shiny app (`app.R`) and its data (`review_results_all_030826.csv`)
-- `app/app_bslib.R` - alternative Bootstrap 5 UI, reusing the same server
+- `app/app.R` - entry point, the Bootstrap 5 (bslib) UI; sources `appGH.R`
+- `app/appGH.R` - data preparation, server logic, and the original fluidPage UI
+- `app/review_results_all_030826.csv` - the review dataset
 - `dependencies.R` - R packages installed into the Docker image
 - `Dockerfile` / `docker-compose.yml` - container build (based on `rocker/shiny`)
 - `.github/` - build & deploy GitHub Actions (modelled on NIVA's WATERS pipeline)
