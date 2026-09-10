@@ -2,7 +2,11 @@
 library(dplyr)
 library(stringr)
 library(leaflet)
-data_path <- 'review_results_shiny_250626.csv'
+data_path <- 'review_results_all_030826.csv'
+# updated 26.08.2026: consistent direction of effect terminology
+# updated 19.08.2026: fixed subset color labels
+# updated 18.08.2026: added function to replace non-ASCII characters in PaperIDs with ?
+# updated 06.08.2026: manuscript dataset, improved tooltips, corrected pathway summing
 # updated 25.06.2026: manuscript dataset, beneficial & adverse terms, updated color palette
 # updated 16.06.2026: revised dataset (benthos added, categories consolidated)
 # updated 24.04.2026: final dataset, leaflet color matches improved, filtering for overrepresented papers done after other filters applied
@@ -24,6 +28,10 @@ meta$Include <- lapply(meta$Notes, function(x) if(grepl('Exclude', x, fixed = TR
 meta_include <- meta[meta$Include=='Include',]
 names(meta_include)[1] <- "PaperID"
 meta_include <- meta_include[, !grepl("^X.", names(meta_include))]
+meta_include$Direction <- replace(meta_include$Direction, meta_include$Direction=='Positive', 'Beneficial')
+meta_include$Direction <- replace(meta_include$Direction, meta_include$Direction=='Negative', 'Adverse')
+meta_include$Direction <- replace(meta_include$Direction, meta_include$Direction=='Mixed-Positive', 'Mixed-Beneficial')
+meta_include$Direction <- replace(meta_include$Direction, meta_include$Direction=='Mixed-Negative', 'Mixed-Adverse')
 meta_include <- meta_include[!(meta_include$Effect=="" | meta_include$Endpoint=="" | meta_include$Stressor=="" | meta_include$Direction==""),]
 meta_exclude <- meta_include %>%
   group_by(Endpoint) %>%
@@ -52,10 +60,17 @@ meta_plot <- meta_include %>% group_by(Stressor, Effect, Endpoint, Direction) %>
 
 
 pal <- hcl.colors(6, palette = 'Spectral')
-names(pal) <- rev(c("Positive", "Mixed-Positive", "Insignificant",  "Mixed", "Mixed-Negative", "Negative"))
+names(pal) <- rev(c("Beneficial", "Mixed-Beneficial", "Insignificant",  "Mixed", "Mixed-Adverse", "Adverse"))
 
 ### studies ----
 meta_study_plot <- meta_include %>% group_by(Stressor, Commercial, Mammals, Effect, Endpoint, Direction, PaperID) %>% summarise(freq = n())
+# Function to remove non-ASCII characters using iconv
+remove_non_ascii <- function(x) {
+  iconv(x, "UTF-8", "ASCII", sub = "?")
+}
+meta_study_plot$PaperID <- sapply(meta_study_plot$PaperID, remove_non_ascii)
+
+# meta_study_plot$PaperID <- lapply(meta_study_plot$PaperID, iconv, to = "UTF-8")
 
 ### leaflet ----
 leaf_dat <- meta_include
@@ -63,9 +78,39 @@ leaf_dat <- leaf_dat[,colSums(is.na(leaf_dat))<nrow(leaf_dat)]
 leaf_dat$lng <- meta_include$Long
 leaf_dat$lat <- meta_include$Lat
 leaf_dat$Species <- lapply(leaf_dat$Species, str_replace, pattern="sealB", replacement="seal")
-marker_colors <- c("red", "darkred", "orange", "green", "darkgreen", "lightgreen", "blue", "darkblue", "lightblue", "purple", "lightred", "pink", "cadetblue", "gray", "black")
-pal_endpoint <- marker_colors
-names(pal_endpoint) <- unique(leaf_dat$Endpoint)
+# Leaflet AwesomeMarkers supports only this fixed set of marker colours, and it
+# draws them from a sprite image rather than from CSS. addLegend() by contrast
+# needs real CSS colours, so keep the matching hex values alongside the names.
+# ("lightred" is not a CSS colour at all, which is why its legend swatch was
+# rendering blank.) Hexes sampled from leaflet's images/markers-soft.png.
+awesome_hex <- c(
+  red       = "#D63E2A", darkred    = "#A23336", lightred   = "#FF8E7F",
+  orange    = "#F69730", beige      = "#FFCB92",
+  green     = "#72B026", darkgreen  = "#728224", lightgreen = "#BBF970",
+  blue      = "#38AADD", darkblue   = "#0067A3", lightblue  = "#8ADAFF",
+  purple    = "#D252B9", darkpurple = "#593869",
+  cadetblue = "#436978", pink       = "#FF91EA",
+  gray      = "#575757", lightgray  = "#A3A3A3", black      = "#303030"
+)
+
+# The first 15 entries keep their original order, so every endpoint keeps the
+# colour it already had; the last three are spare capacity for new endpoints.
+marker_colors <- c("red", "darkred", "orange", "green", "darkgreen", "lightgreen",
+                   "blue", "darkblue", "lightblue", "purple", "lightred", "pink",
+                   "cadetblue", "gray", "black",
+                   "darkpurple", "beige", "lightgray")
+
+map_endpoints <- unique(leaf_dat$Endpoint)
+if (length(map_endpoints) > length(marker_colors)) {
+  warning(sprintf(
+    "%d map endpoints but only %d AwesomeMarkers colours; colours will repeat.",
+    length(map_endpoints), length(marker_colors)))
+}
+# Recycle rather than error out if endpoints ever outnumber the palette.
+pal_endpoint <- setNames(
+  marker_colors[(seq_along(map_endpoints) - 1L) %% length(marker_colors) + 1L],
+  map_endpoints
+)
 library(fontawesome)
 icons <- c("book", "desktop", "file", "flask",  "anchor", "question") # https://rstudio.github.io/fontawesome/articles/icon-reference.html
 names(icons) <- c("Review", "Model", "Survey", "Lab", "Field", "Other")
@@ -141,8 +186,22 @@ node_width <- 1/4
 # Width of alluvia
 alluvium_width <- 1/3
 
+# Stratum column labels. Shared by the rendered plot and the hover geometry so
+# the two always build identical coordinates; the number of labels must match
+# the number of axis* aesthetics used by the current branch.
+strata_axis <- function(labels) {
+  list(
+    scale_x_discrete(limits = labels, expand = c(0.15, 0.05)),
+    # Remove the 5% blank band the y scale adds below the lowest stratum,
+    # while keeping 5% headroom at the top.
+    scale_y_continuous(expand = expansion(mult = c(0, 0.05))),
+    theme(axis.text.x = element_text(size = 15, face = "bold", colour = "grey20",
+                                     margin = margin(t = 8)))
+  )
+}
+
 stressor.names=c("All",unique(d.path$Stressor))
-endpoint.names=c("All","Commercial fish","Marine mammals",unique(d.path$Endpoint))
+endpoint.names=c("All","Commercial fish","Marine mammals",endpoints_trophic)
 mode.names=c("Pathways","Overrepresented Studies","All Studies")
 
 ui <- fluidPage(
@@ -162,8 +221,12 @@ ui <- fluidPage(
     )
   ),
   fluidRow(
-    plotOutput("plot", height = "700px", hover = hoverOpts(id = "plot_hover")),
-    htmlOutput("tooltip"),
+    # position: relative makes the absolutely-positioned tooltip resolve against
+    # the plot's top-left corner, so hover$coords_css needs no layout offsets.
+    div(style = "position: relative;",
+        plotOutput("plot", height = "700px", hover = hoverOpts(id = "plot_hover")),
+        htmlOutput("tooltip")
+    ),
     em("Hover your mouse over nodes or pathways within the plot for additional information", style = "color:blue")
   )
 )
@@ -180,6 +243,19 @@ ui <- fluidPage(
 # )
 
 server <- function(input, output, session) {
+
+  # Stratum columns for the current view. Mirrors the axis* aesthetics selected
+  # in get.plot() and get.tooltip() so both are labelled and built consistently.
+  axis_labels <- reactive({
+    if (input$mode %in% c("All Studies", "Overrepresented Studies")) {
+      c("Stressor", "Effect", "Endpoint", "Study")
+    } else if (input$endpoint != "All" &&
+               !input$endpoint %in% c("Commercial fish", "Marine mammals")) {
+      c("Stressor", "Effect")
+    } else {
+      c("Stressor", "Effect", "Endpoint")
+    }
+  })
   
   #get subset of data according to inputs
   get.data<-reactive(
@@ -220,7 +296,7 @@ server <- function(input, output, session) {
       if(input$mode=="All Studies") {h="All Studies"}
       # if(input$mode=="Map") {h="Overrepresented Studies"}
       d=get.data()
-      if(input$mode=="Pathways") {count=paste(nrow(d), h, "found.")} else 
+      if(input$mode=="Pathways") {count=paste(sum(d$freq), h, "found.")} else 
       {count=paste(length(unique(d$PaperID)), h, "found.")}
       count
     }
@@ -247,7 +323,7 @@ server <- function(input, output, session) {
                           aes(label = after_stat(stratum))) +
                 geom_text(stat = "stratum",
                           aes(label = ..count..), vjust = 1.6) +
-                scale_fill_manual(values = pal, labels = labs) +
+                scale_fill_manual(values = pal) +
                 theme_void() +
                 labs(title = paste(input$endpoint, input$stressor, "Stressor Linkages")) +
                 theme(plot.title = element_text(size = 22, face = "bold"))
@@ -265,7 +341,7 @@ server <- function(input, output, session) {
                           aes(label = after_stat(stratum))) +
                 geom_text(stat = "stratum",
                           aes(label = ..count..), vjust = 1.6) +
-                scale_fill_manual(values = pal, labels = labs) +
+                scale_fill_manual(values = pal) +
                 theme_void() +
                 # geom_alluvium(aes(fill = Direction)) +
                 # geom_stratum() +
@@ -299,7 +375,7 @@ server <- function(input, output, session) {
                           aes(label = after_stat(stratum))) +
                 geom_text(stat = "stratum",
                           aes(label = ..count..), vjust = 1.6) +
-                scale_fill_manual(values = pal, labels = labs) +
+                scale_fill_manual(values = pal) +
                 theme_void() +
                 labs(title = paste(input$endpoint, input$stressor, "Stressor Linkages")) +
                 theme(plot.title = element_text(size = 22, face = "bold"))
@@ -317,7 +393,7 @@ server <- function(input, output, session) {
                           aes(label = after_stat(stratum))) +
                 geom_text(stat = "stratum",
                           aes(label = ..count..), vjust = 1.6) +
-                scale_fill_manual(values = pal, labels = labs) +
+                scale_fill_manual(values = pal) +
                 # geom_alluvium(aes(fill = Direction)) +
                 # geom_stratum() +
                 # geom_text(stat = "stratum",
@@ -345,7 +421,7 @@ server <- function(input, output, session) {
                         aes(label = after_stat(stratum))) +
               geom_text(stat = "stratum",
                         aes(label = ..count..), vjust = 1.6) +
-              scale_fill_manual(values = pal, labels = labs) +
+              scale_fill_manual(values = pal) +
               # 
               # geom_alluvium(aes(fill = Direction)) +
               # geom_stratum() +
@@ -370,7 +446,7 @@ server <- function(input, output, session) {
                         aes(label = after_stat(stratum))) +
               geom_text(stat = "stratum",
                         aes(label = ..count..), vjust = 1.6) +
-              scale_fill_manual(values = pal, labels = labs) +
+              scale_fill_manual(values = pal) +
               # 
               # geom_alluvium(aes(fill = Direction)) +
               # geom_stratum() +
@@ -403,7 +479,7 @@ server <- function(input, output, session) {
                     aes(label = after_stat(stratum))) +
           geom_text(stat = "stratum",
                     aes(label = ..count..), vjust = 1.6) +
-          scale_fill_manual(values = pal, labels = labs) +
+          scale_fill_manual(values = pal) +
           # 
           # geom_alluvium(aes(fill = Direction)) +
           # geom_stratum() +
@@ -431,7 +507,7 @@ server <- function(input, output, session) {
                     aes(label = after_stat(stratum))) +
           geom_text(stat = "stratum",
                     aes(label = ..count..), vjust = 1.6) +
-          scale_fill_manual(values = pal, labels = labs) +
+          scale_fill_manual(values = pal) +
           # 
           # geom_alluvium(aes(fill = Direction)) +
           # geom_stratum() +
@@ -467,6 +543,7 @@ server <- function(input, output, session) {
         markerColor = dm$fill
       )
       pal <- pal_endpoint[unique(dm$Endpoint)]
+      pal <- pal[!is.na(pal)]
       g <- leaflet(dm) %>%
         addTiles() %>%
         setView(lng = 5, lat = 55, zoom = 5) %>%
@@ -476,7 +553,7 @@ server <- function(input, output, session) {
                                                                                                           "Study type: ", Approach.category, "<br>",
                                                                                                           "<a href=\"", DOI_link , "\">", 
                                                                                                           Title, "</a>")) %>%
-        addLegend(colors = pal, labels = names(pal), position = "bottomright")
+        addLegend(colors = unname(awesome_hex[pal]), labels = names(pal), opacity = 1, position = "bottomright")
       
       return(g)
     }
@@ -493,12 +570,10 @@ server <- function(input, output, session) {
                           axis2 = Effect, # Second variable on the X-axis
                           # axis3 = Endpoint,   # Third variable on the X-axis
                           y = freq)) +
-            geom_alluvium(aes(fill = Direction)) +
-            geom_stratum() +
+            stat_alluvium(aes(fill = Direction), ,aes.bind = 'alluvia', lode.guidance = 'frontback') +
+            stat_stratum() +
             geom_text(stat = "stratum",
                       aes(label = after_stat(stratum))) +
-            scale_x_discrete(limits = c("Stressor", "Effect"),
-                             expand = c(0.15, 0.05)) +
             theme_void() +
             labs(title = paste(input$endpoint, "Stressor Linkages")) +
             theme(plot.title = element_text(size = 22, face = "bold"))
@@ -508,12 +583,10 @@ server <- function(input, output, session) {
                           axis2 = Effect, # Second variable on the X-axis
                           axis3 = Endpoint,   # Third variable on the X-axis
                           y = freq)) +
-            geom_alluvium(aes(fill = Direction)) +
-            geom_stratum() +
+            stat_alluvium(aes(fill = Direction), ,aes.bind = 'alluvia', lode.guidance = 'frontback') +
+            stat_stratum() +
             geom_text(stat = "stratum",
                       aes(label = after_stat(stratum))) +
-            scale_x_discrete(limits = c("Stressor", "Endpoint"),
-                             expand = c(0.15, 0.05)) +
             theme_void() +
             labs(title = paste("All Stressor Linkages")) +
             theme(plot.title = element_text(size = 22, face = "bold"))
@@ -528,12 +601,10 @@ server <- function(input, output, session) {
                         axis3 = Endpoint,   # Third variable on the X-axis
                         axis4 = PaperID,
                         y = freq)) +
-          geom_alluvium(aes(fill = Direction)) +
-          geom_stratum() +
+          stat_alluvium(aes(fill = Direction), ,aes.bind = 'alluvia', lode.guidance = 'frontback') +
+          stat_stratum() +
           geom_text(stat = "stratum",
                     aes(label = after_stat(stratum))) +
-          scale_x_discrete(limits = c("Stressor", "PaperID"),
-                           expand = c(0.15, 0.05)) +
           theme_void()
         
       } else if(input$mode=="Overrepresented Studies") 
@@ -545,24 +616,22 @@ server <- function(input, output, session) {
                         axis3 = Endpoint,   # Third variable on the X-axis
                         axis4 = PaperID,
                         y = freq)) +
-          geom_alluvium(aes(fill = Direction)) +
-          geom_stratum() +
+          stat_alluvium(aes(fill = Direction), ,aes.bind = 'alluvia', lode.guidance = 'frontback') +
+          stat_stratum() +
           geom_text(stat = "stratum",
                     aes(label = after_stat(stratum))) +
-          scale_x_discrete(limits = c("Stressor", "PaperID"),
-                           expand = c(0.15, 0.05)) +
           theme_void()
         
       }
       # g <- get.plot()
-      pbuilt <- ggplot_build(g)
+      pbuilt <- ggplot_build(g + strata_axis(axis_labels()))
       
       return(pbuilt)
     }
   )
   # plot
   output$count <- renderText(get.count())
-  output$plot <- renderPlot(get.plot())
+  output$plot <- renderPlot(get.plot() + strata_axis(axis_labels()))
   output$leaf <- renderLeaflet(get.leaf())
   output$tooltip <- renderText(
     if(!is.null(input$plot_hover)) {
@@ -626,7 +695,7 @@ server <- function(input, output, session) {
             "n =", node_n,
             style = paste0(
               "position: absolute; ",
-              "top: ", hover$coords_css$y + offset + 450, "px; ",
+              "top: ", hover$coords_css$y + offset, "px; ",
               "left: ", hover$coords_css$x + offset, "px; ",
               "background: gray; ",
               "padding: 1px; ",
@@ -652,7 +721,7 @@ server <- function(input, output, session) {
               "n =", flow_n,
               style = paste0(
                 "position: absolute; ",
-                "top: ", hover$coords_css$y + offset + 450, "px; ",
+                "top: ", hover$coords_css$y + offset, "px; ",
                 "left: ", hover$coords_css$x + offset, "px; ",
                 "background: gray; ",
                 "padding: 3px; ",
