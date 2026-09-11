@@ -3,6 +3,7 @@ library(dplyr)
 library(stringr)
 library(leaflet)
 data_path <- 'review_results_all_030826.csv'
+# updated 10.09.2026: UI wrapper with bslib, toolstip positioning improvement.
 # updated 26.08.2026: consistent direction of effect terminology
 # updated 19.08.2026: fixed subset color labels
 # updated 18.08.2026: added function to replace non-ASCII characters in PaperIDs with ?
@@ -166,8 +167,6 @@ icons_plot <- awesomeIcons(
 ## Shiny app ----
 library(shiny)
 library(stringr)
-library(networkD3)
-library(plotly)
 library(ggalluvial)
 library(htmltools)
 library(sp)
@@ -327,7 +326,7 @@ server <- function(input, output, session) {
                 theme_void() +
                 labs(title = paste(input$endpoint, input$stressor, "Stressor Linkages")) +
                 theme(plot.title = element_text(size = 22, face = "bold"))
-              g <- g + labs(caption = "Direction of a stressor's action represents whether it it positively or negatively affects the endpoint via the given mechanism. \nFor example, a negative pathway flowing from Eutrophication to Herring via Reproduction/Recruitment signifies a paper that found eutrophication was negatively impacting reproduction and/or recruitment in herring.") + theme(plot.caption = element_text(size = 14, hjust = 0))
+              # g <- g + labs(caption = "Direction of a stressor's action represents whether it it positively or negatively affects the endpoint via the given mechanism. \nFor example, a negative pathway flowing from Eutrophication to Herring via Reproduction/Recruitment signifies a paper that found eutrophication was negatively impacting reproduction and/or recruitment in herring.") + theme(plot.caption = element_text(size = 14, hjust = 0))
               return(g)
             } else {
               g <- ggplot(data = de,
@@ -352,7 +351,7 @@ server <- function(input, output, session) {
                 # theme_void() +
                 labs(title = paste(input$endpoint, "Stressor Linkages")) +
                 theme(plot.title = element_text(size = 22, face = "bold"))
-              g <- g + labs(caption = "Direction of a stressor's action represents whether it it positively or negatively affects the endpoint via the given mechanism. \nFor example, a negative pathway flowing from Eutrophication to Herring via Reproduction/Recruitment signifies a paper that found eutrophication was negatively impacting reproduction and/or recruitment in herring.") + theme(plot.caption = element_text(size = 14, hjust = 0))
+              # g <- g + labs(caption = "Direction of a stressor's action represents whether it it positively or negatively affects the endpoint via the given mechanism. \nFor example, a negative pathway flowing from Eutrophication to Herring via Reproduction/Recruitment signifies a paper that found eutrophication was negatively impacting reproduction and/or recruitment in herring.") + theme(plot.caption = element_text(size = 14, hjust = 0))
               return(g)
             }
           } else {
@@ -379,7 +378,7 @@ server <- function(input, output, session) {
                 theme_void() +
                 labs(title = paste(input$endpoint, input$stressor, "Stressor Linkages")) +
                 theme(plot.title = element_text(size = 22, face = "bold"))
-              g <- g + labs(caption = "Direction of a stressor's action represents whether it it positively or negatively affects the endpoint via the given mechanism. \nFor example, a negative pathway flowing from Eutrophication to Herring via Reproduction/Recruitment signifies a paper that found eutrophication was negatively impacting reproduction and/or recruitment in herring.") + theme(plot.caption = element_text(size = 14, hjust = 0))
+              # g <- g + labs(caption = "Direction of a stressor's action represents whether it it positively or negatively affects the endpoint via the given mechanism. \nFor example, a negative pathway flowing from Eutrophication to Herring via Reproduction/Recruitment signifies a paper that found eutrophication was negatively impacting reproduction and/or recruitment in herring.") + theme(plot.caption = element_text(size = 14, hjust = 0))
               return(g)
             } else {
               g <- ggplot(data = de,
@@ -403,7 +402,7 @@ server <- function(input, output, session) {
                 theme_void() +
                 labs(title = paste(input$endpoint, "Stressor Linkages")) +
                 theme(plot.title = element_text(size = 22, face = "bold"))
-              g <- g + labs(caption = "Direction of a stressor's action represents whether it it positively or negatively affects the endpoint via the given mechanism. \nFor example, a negative pathway flowing from Eutrophication to Herring via Reproduction/Recruitment signifies a paper that found eutrophication was negatively impacting reproduction and/or recruitment in herring.") + theme(plot.caption = element_text(size = 14, hjust = 0))
+              # g <- g + labs(caption = "Direction of a stressor's action represents whether it it positively or negatively affects the endpoint via the given mechanism. \nFor example, a negative pathway flowing from Eutrophication to Herring via Reproduction/Recruitment signifies a paper that found eutrophication was negatively impacting reproduction and/or recruitment in herring.") + theme(plot.caption = element_text(size = 14, hjust = 0))
               return(g)
             }
           }
@@ -432,7 +431,7 @@ server <- function(input, output, session) {
               theme_void() +
               labs(title = paste("All Species", input$stressor,"Stressor Linkages")) +
               theme(plot.title = element_text(size = 22, face = "bold"))
-            g <- g + labs(caption = "Direction of a stressor's action represents whether it it positively or negatively affects the endpoint via the given mechanism. \nFor example, a negative pathway flowing from Eutrophication to Herring via Reproduction/Recruitment signifies a paper that found eutrophication was negatively impacting reproduction and/or recruitment in herring.") + theme(plot.caption = element_text(size = 14, hjust = 0))
+            # g <- g + labs(caption = "Direction of a stressor's action represents whether it it positively or negatively affects the endpoint via the given mechanism. \nFor example, a negative pathway flowing from Eutrophication to Herring via Reproduction/Recruitment signifies a paper that found eutrophication was negatively impacting reproduction and/or recruitment in herring.") + theme(plot.caption = element_text(size = 14, hjust = 0))
             return(g)
           } else {
             g <- ggplot(data = de,
@@ -457,7 +456,7 @@ server <- function(input, output, session) {
               theme_void() +
               labs(title = paste("All Stressor Linkages")) +
               theme(plot.title = element_text(size = 22, face = "bold"))
-            g <- g + labs(caption = "Direction of a stressor's action represents whether it it positively or negatively affects the endpoint via the given mechanism. \nFor example, a negative pathway flowing from Eutrophication to Herring via Reproduction/Recruitment signifies a paper that found eutrophication was negatively impacting reproduction and/or recruitment in herring.") + theme(plot.caption = element_text(size = 14, hjust = 0))
+            # g <- g + labs(caption = "Direction of a stressor's action represents whether it it positively or negatively affects the endpoint via the given mechanism. \nFor example, a negative pathway flowing from Eutrophication to Herring via Reproduction/Recruitment signifies a paper that found eutrophication was negatively impacting reproduction and/or recruitment in herring.") + theme(plot.caption = element_text(size = 14, hjust = 0))
             return(g)
           }
 
@@ -553,7 +552,7 @@ server <- function(input, output, session) {
                                                                                                           "Study type: ", Approach.category, "<br>",
                                                                                                           "<a href=\"", DOI_link , "\">", 
                                                                                                           Title, "</a>")) %>%
-        addLegend(colors = unname(awesome_hex[pal]), labels = names(pal), opacity = 1, position = "bottomright")
+        addLegend(colors = unname(awesome_hex[pal]), labels = names(pal), opacity = 1, title = "Endpoint", position = "bottomright")
       
       return(g)
     }
