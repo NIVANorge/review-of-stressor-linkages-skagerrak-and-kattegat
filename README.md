@@ -8,17 +8,38 @@ Live app: https://gghill.shinyapps.io/Review_Stressors_SkagerrakKattegat/
 
 ## Layout
 
-- `app/app_bslib.R` - entry point, the Bootstrap 5 (bslib) UI; sources `appGH.R`
+- `app/app.R` - entry point, the Bootstrap 5 (bslib) UI; sources `appGH.R`
 - `app/appGH.R` - data preparation, server logic, and the original fluidPage UI
 - `app/review_results_all_030826.csv` - the review dataset
 - `dependencies.R` - R packages installed into the Docker image
 
 ## Run locally
 
-With R:
+Install the dependencies once:
 
 ```r
-CMD ["R", "-e", "shiny::runApp(shiny::shinyAppFile('/app/app_bslib.R'), host = '0.0.0.0', port = 3838)"]
+install.packages(c(
+  "shiny", "bslib", "dplyr", "stringr", "leaflet",
+  "fontawesome", "ggplot2", "ggalluvial", "htmltools", "sp"
+))
+```
+
+Then launch the app straight from GitHub:
+
+```r
+shiny::runGitHub(
+  repo     = "Review-of-Stressor-Linkages-Skagerrak-and-Kattegat",
+  username = "gghill",
+  subdir   = "app"
+)
+```
+
+To run a specific released version, add `ref = "v1.0.0"`.
+
+Or from a local clone:
+
+```r
+shiny::runApp("app")
 ```
 
 With Docker:
