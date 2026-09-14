@@ -8,20 +8,17 @@ Live app: https://gghill.shinyapps.io/Review_Stressors_SkagerrakKattegat/
 
 ## Layout
 
-- `app/app.R` - entry point, the Bootstrap 5 (bslib) UI; sources `appGH.R`
+- `app/app_bslib.R` - entry point, the Bootstrap 5 (bslib) UI; sources `appGH.R`
 - `app/appGH.R` - data preparation, server logic, and the original fluidPage UI
 - `app/review_results_all_030826.csv` - the review dataset
 - `dependencies.R` - R packages installed into the Docker image
-- `Dockerfile` / `docker-compose.yml` - container build (based on `rocker/shiny`)
-- `.github/` - build & deploy GitHub Actions (modelled on NIVA's WATERS pipeline)
-- `deployment/` - Kustomize manifests for the test and prod Kubernetes namespaces
 
 ## Run locally
 
 With R:
 
 ```r
-shiny::runApp("app")
+CMD ["R", "-e", "shiny::runApp(shiny::shinyAppFile('/app/app_bslib.R'), host = '0.0.0.0', port = 3838)"]
 ```
 
 With Docker:
@@ -29,11 +26,5 @@ With Docker:
 ```bash
 docker compose up --build   # then open http://localhost:3838
 ```
-
-## Deployment
-
-Pushes to `main` build a container image and deploy to the test cluster; the prod
-deploy is triggered manually (`workflow_dispatch`). Both rely on NIVA's
-workload-identity secrets and self-hosted runners being configured for the repo.
 
 Questions: please open an issue on this repository.
