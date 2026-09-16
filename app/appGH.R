@@ -194,8 +194,15 @@ strata_axis <- function(labels) {
     # Remove the 5% blank band the y scale adds below the lowest stratum,
     # while keeping 5% headroom at the top.
     scale_y_continuous(expand = expansion(mult = c(0, 0.05))),
-    theme(axis.text.x = element_text(size = 15, face = "bold", colour = "grey20",
-                                     margin = margin(t = 8)))
+    theme(
+      axis.text.x = element_text(size = 15, face = "bold", colour = "grey20",
+                                 margin = margin(t = 8)),
+      # theme_void() zeroes plot.margin, which leaves the legend flush against the
+      # right edge of the viewer. Give it an equal gap on both sides so it sits
+      # centred between the plot panel and the window edge.
+      legend.box.spacing = unit(0, "pt"),
+      plot.margin = margin(t = 8, r = 10, b = 8, l = 8)
+    )
   )
 }
 
@@ -325,7 +332,11 @@ server <- function(input, output, session) {
                 scale_fill_manual(values = pal) +
                 theme_void() +
                 labs(title = paste(input$endpoint, input$stressor, "Stressor Linkages")) +
-                theme(plot.title = element_text(size = 22, face = "bold"))
+                theme(plot.title = element_text(size = 22, face = "bold"))+ 
+                theme(
+                  legend.text = element_text(size = 14),   # Legend labels
+                  legend.title = element_text(size = 16, face = "bold") # Legend title
+                )
               # g <- g + labs(caption = "Direction of a stressor's action represents whether it it positively or negatively affects the endpoint via the given mechanism. \nFor example, a negative pathway flowing from Eutrophication to Herring via Reproduction/Recruitment signifies a paper that found eutrophication was negatively impacting reproduction and/or recruitment in herring.") + theme(plot.caption = element_text(size = 14, hjust = 0))
               return(g)
             } else {
@@ -350,7 +361,11 @@ server <- function(input, output, session) {
                 #                  expand = c(0.15, 0.05)) +
                 # theme_void() +
                 labs(title = paste(input$endpoint, "Stressor Linkages")) +
-                theme(plot.title = element_text(size = 22, face = "bold"))
+                theme(plot.title = element_text(size = 22, face = "bold"))+ 
+                theme(
+                  legend.text = element_text(size = 14),   # Legend labels
+                  legend.title = element_text(size = 16, face = "bold") # Legend title
+                )
               # g <- g + labs(caption = "Direction of a stressor's action represents whether it it positively or negatively affects the endpoint via the given mechanism. \nFor example, a negative pathway flowing from Eutrophication to Herring via Reproduction/Recruitment signifies a paper that found eutrophication was negatively impacting reproduction and/or recruitment in herring.") + theme(plot.caption = element_text(size = 14, hjust = 0))
               return(g)
             }
@@ -377,7 +392,11 @@ server <- function(input, output, session) {
                 scale_fill_manual(values = pal) +
                 theme_void() +
                 labs(title = paste(input$endpoint, input$stressor, "Stressor Linkages")) +
-                theme(plot.title = element_text(size = 22, face = "bold"))
+                theme(plot.title = element_text(size = 22, face = "bold"))+ 
+                theme(
+                  legend.text = element_text(size = 14),   # Legend labels
+                  legend.title = element_text(size = 16, face = "bold") # Legend title
+                )
               # g <- g + labs(caption = "Direction of a stressor's action represents whether it it positively or negatively affects the endpoint via the given mechanism. \nFor example, a negative pathway flowing from Eutrophication to Herring via Reproduction/Recruitment signifies a paper that found eutrophication was negatively impacting reproduction and/or recruitment in herring.") + theme(plot.caption = element_text(size = 14, hjust = 0))
               return(g)
             } else {
@@ -401,7 +420,11 @@ server <- function(input, output, session) {
                 #                  expand = c(0.15, 0.05)) +
                 theme_void() +
                 labs(title = paste(input$endpoint, "Stressor Linkages")) +
-                theme(plot.title = element_text(size = 22, face = "bold"))
+                theme(plot.title = element_text(size = 22, face = "bold"))+ 
+                theme(
+                  legend.text = element_text(size = 14),   # Legend labels
+                  legend.title = element_text(size = 16, face = "bold") # Legend title
+                )
               # g <- g + labs(caption = "Direction of a stressor's action represents whether it it positively or negatively affects the endpoint via the given mechanism. \nFor example, a negative pathway flowing from Eutrophication to Herring via Reproduction/Recruitment signifies a paper that found eutrophication was negatively impacting reproduction and/or recruitment in herring.") + theme(plot.caption = element_text(size = 14, hjust = 0))
               return(g)
             }
@@ -430,7 +453,11 @@ server <- function(input, output, session) {
               #                  expand = c(0.15, 0.05)) +
               theme_void() +
               labs(title = paste("All Species", input$stressor,"Stressor Linkages")) +
-              theme(plot.title = element_text(size = 22, face = "bold"))
+              theme(plot.title = element_text(size = 22, face = "bold"))+ 
+              theme(
+                legend.text = element_text(size = 14),   # Legend labels
+                legend.title = element_text(size = 16, face = "bold") # Legend title
+              )
             # g <- g + labs(caption = "Direction of a stressor's action represents whether it it positively or negatively affects the endpoint via the given mechanism. \nFor example, a negative pathway flowing from Eutrophication to Herring via Reproduction/Recruitment signifies a paper that found eutrophication was negatively impacting reproduction and/or recruitment in herring.") + theme(plot.caption = element_text(size = 14, hjust = 0))
             return(g)
           } else {
@@ -455,7 +482,11 @@ server <- function(input, output, session) {
               #                  expand = c(0.15, 0.05)) +
               theme_void() +
               labs(title = paste("All Stressor Linkages")) +
-              theme(plot.title = element_text(size = 22, face = "bold"))
+              theme(plot.title = element_text(size = 22, face = "bold"))+ 
+              theme(
+                legend.text = element_text(size = 14),   # Legend labels
+                legend.title = element_text(size = 16, face = "bold") # Legend title
+              )
             # g <- g + labs(caption = "Direction of a stressor's action represents whether it it positively or negatively affects the endpoint via the given mechanism. \nFor example, a negative pathway flowing from Eutrophication to Herring via Reproduction/Recruitment signifies a paper that found eutrophication was negatively impacting reproduction and/or recruitment in herring.") + theme(plot.caption = element_text(size = 14, hjust = 0))
             return(g)
           }
@@ -486,7 +517,11 @@ server <- function(input, output, session) {
           #           aes(label = after_stat(stratum))) +
           # scale_x_discrete(limits = c("Stressor", "PaperID"),
           #                  expand = c(0.15, 0.05)) +
-          theme_void()
+          theme_void() + 
+          theme(
+            legend.text = element_text(size = 14),   # Legend labels
+            legend.title = element_text(size = 16, face = "bold") # Legend title
+          )
         return(g)
         
       }

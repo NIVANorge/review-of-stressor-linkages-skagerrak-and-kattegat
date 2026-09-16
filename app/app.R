@@ -50,9 +50,11 @@ ui <- page_sidebar(
 
   card(
     card_header("Study locations"),
+    card_body(class = "text-muted medium",
+    "Marker color corresponds to endpoint, while marker icon corresponds to study type."),
     full_screen = TRUE,
     leafletOutput("leaf", height = 460),
-    card_footer(class = "text-muted small", "Click a marker for study metadata.")
+    card_footer(class = "fst-italic", "Click a marker for study metadata. Use the expand icon (bottom right) for a fullscreen view.")
   ),
 
   card(
