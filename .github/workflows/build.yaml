@@ -2,7 +2,7 @@ name: Build & Push
 on:
   push:
     branches:
-      - 'master'
+      - 'main'
     paths:
       - '.github/workflows/**'
       - 'app/**'
