@@ -50,4 +50,11 @@ With Docker:
 docker compose up --build   # then open http://localhost:3838
 ```
 
+Or, if you built the image yourself:
+
+```bash
+docker build -t griffin .
+docker run --rm -it -p 3838:3838 griffin   # then open http://localhost:3838
+```
+
 Questions: please open an issue on this repository.
