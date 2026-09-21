@@ -4,6 +4,7 @@ library(stringr)
 library(leaflet)
 # data_path <- 'review_results_all_030826.csv'
 data_path <- 'review_results_all_210926.csv'
+# updated 21.09.2026: fixed minor labeling errors in dataset locations
 # updated 10.09.2026: UI wrapper with bslib, toolstip positioning improvement.
 # updated 26.08.2026: consistent direction of effect terminology
 # updated 19.08.2026: fixed subset color labels
