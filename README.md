@@ -12,7 +12,7 @@ Coming soon as sk-link hosted by [NIVA](niva.no)
 
 - `app/app.R` - entry point, the Bootstrap 5 (bslib) UI; sources `appGH.R`
 - `app/appGH.R` - data preparation, server logic, and the original fluidPage UI
-- `app/review_results_all_030826.csv` - the review dataset
+- `app/review_results_all_210926.csv` - the review dataset
 - `dependencies.R` - R packages installed into the Docker image
 
 ## Run locally
