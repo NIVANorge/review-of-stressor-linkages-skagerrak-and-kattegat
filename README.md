@@ -4,9 +4,9 @@ A Shiny app summarizing a Web of Science structured literature review of stresso
 acting in the Skagerrak, Kattegat, Baltic, and North Seas. It renders alluvial
 stressor -> effect -> endpoint pathways divided into adverse and beneficial impacts alongside an interactive map of study locations.
 
-Live app: https://gghill.shinyapps.io/Review_Stressors_SkagerrakKattegat/
+Live app: https://sk-link.p.niva.no/
 
-Coming soon as sk-link hosted by [NIVA](niva.no)
+Coming soon a peer reviewed article.
 
 ## Layout
 
