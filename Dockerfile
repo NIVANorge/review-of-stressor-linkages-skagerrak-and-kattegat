@@ -12,7 +12,7 @@ RUN apt-get update -qq && apt-get -y --no-install-recommends install \
 COPY dependencies.R .
 RUN R --slave --no-restore -e 'source("dependencies.R")'
 
-COPY /app ./app
+COPY --chown=shiny:shiny /app ./app
 
 # expose port
 EXPOSE 3838
