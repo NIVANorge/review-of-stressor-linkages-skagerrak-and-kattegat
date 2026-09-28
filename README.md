@@ -30,8 +30,7 @@ Then launch the app straight from GitHub:
 
 ```r
 shiny::runGitHub(
-  repo     = "Review-of-Stressor-Linkages-Skagerrak-and-Kattegat",
-  username = "gghill",
+  repo     = "NIVANorge/review-of-stressor-linkages-skagerrak-and-kattegat",
   subdir   = "app"
 )
 ```
@@ -53,8 +52,8 @@ docker compose up --build   # then open http://localhost:3838
 Or, if you built the image yourself:
 
 ```bash
-docker build -t griffin .
-docker run --rm -it -p 3838:3838 griffin   # then open http://localhost:3838
+docker build -t sk-link .
+docker run --rm -it -p 3838:3838 sk-link   # then open http://localhost:3838
 ```
 
 Questions: please open an issue on this repository.
