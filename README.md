@@ -6,6 +6,8 @@ stressor -> effect -> endpoint pathways divided into adverse and beneficial impa
 
 Live app: https://sk-link.p.niva.no/
 
+Initial release logged here on GitHub and via [![DOI](https://zenodo.org/badge/1280256416.svg)](https://doi.org/10.5281/zenodo.23016550)
+
 Coming soon a peer reviewed article.
 
 ## Layout
