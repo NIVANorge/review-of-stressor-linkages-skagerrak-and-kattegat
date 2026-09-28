@@ -40,6 +40,9 @@ ui <- page_sidebar(
     p(class = "text-muted small mb-0",
       "A non-exhaustive Web of Science literature review of stressor
        relationships acting in the Skagerrak, Kattegat, Baltic and North Seas. For questions and comments please contact griffin.hill@niva.no."),
+      p(class = "text-muted small mb-0",
+        "Shiny app source code is available via ", 
+        tags$a(href="https://github.com/NIVANorge/review-of-stressor-linkages-skagerrak-and-kattegat", "NIVA's GitHub.")),
     selectInput("stressor", "Stressor", stressor.names),
     selectInput("endpoint", "Endpoint", endpoint.names),
     selectInput("mode",     "Plot type", mode.names),

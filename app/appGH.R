@@ -2,7 +2,6 @@
 library(dplyr)
 library(stringr)
 library(leaflet)
-# data_path <- 'review_results_all_030826.csv'
 data_path <- 'review_results_all_210926.csv'
 # updated 21.09.2026: fixed minor labeling errors in dataset locations
 # updated 10.09.2026: UI wrapper with bslib, toolstip positioning improvement.
